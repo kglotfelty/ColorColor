@@ -89,7 +89,7 @@ The output looks like
 ![color-color diagram](color_color.png)
 
 
-Now suppose there was a source where the $(H-M)=-0.25$ and $(M-S)=-0.2$.
+Now suppose there was a source where the `(H-M)=-0.25` and `(M-S)=-0.2`.
 If the assumption about the spectral model is correct, then it would 
 be expected to have a photon index between 2 and 3 and absorption between 0.2 and 0.5
 *10^22.
