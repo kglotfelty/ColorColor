@@ -112,7 +112,6 @@ In this case the color-color diagram can only take values that are
 in the gray-shaded triangular region.
 
 
-
 ## Background
 
 Background is not treated specifically with these routines, but you can
