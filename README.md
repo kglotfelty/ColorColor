@@ -14,9 +14,9 @@ Thus defined, the hardness ratio will be between -1 and 1.   Values closer
 to -1 are "soft", low energy band dominates.  Values closer to 1 are "hard",
 high energy band dominates.
 
-A color-color plot then shows the hardness ratio in 1 pair of bands along
-the X-axis, and a different pair of bands along the Y-axis.
-
+A color-color plot then shows the hardness ratio in 1 pair of 
+energy bands along the X-axis, and a different pair of energy bands 
+along the Y-axis.
 
 This collection of classes simulates a spectrum with the user 
 specified spectral model and instrument response.  Two of the model parameters
@@ -89,7 +89,23 @@ The output looks like
 ![color-color diagram](color_color.png)
 
 
-Now suppose there was a source where the `(H-M)=-0.25` and `(M-S)=-0.2`.
+Now suppose there was a source with `(H-M)=-0.25` and `(M-S)=-0.2`.
 If the assumption about the spectral model is correct, then it would 
 be expected to have a photon index between 2 and 3 and absorption between 0.2 and 0.5
 *10^22.
+
+
+
+## Background
+
+Background is not treated specifically with these routines, but you can
+include the background term in the model expression, something like
+
+
+```python
+mymodel = ui.xswabs.abs1 * ui.xspowerlaw.pwrlaw + ui.const1d.bkg
+bkg.c0 = 0.01
+```
+
+to see how it affects things.
+
