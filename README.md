@@ -28,6 +28,10 @@ The idea is that for a source, if you compute the colors and assume a
 spectral model shape, you can get an estimate of the model **parameters** 
 by looking at the color-color diagram.
 
+These routines are dependent on [Sherpa](http://cxc.cfa.harvard.edu/sherpa)
+for the models.  They also use [ChIPS](http://cxc.cfa.harvard.edu/chips) 
+for the plotting; though one could swap in another plotting engine
+with minimal changes.
 
 
 ## Example
@@ -119,5 +123,6 @@ mymodel = ui.xswabs.abs1 * ui.xspowerlaw.pwrlaw + ui.const1d.bkg
 bkg.c0 = 0.01
 ```
 
-to see how it affects things.
+to see how it affects things.  The background model component 
+can be as complicated as 
 
