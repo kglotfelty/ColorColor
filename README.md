@@ -94,13 +94,25 @@ If the assumption about the spectral model is correct, then it would
 be expected to have a photon index between 2 and 3 and absorption between 0.2 and 0.5
 *10^22.
 
+## Total energy band
+
+If the total energy band is `None` then the routines will use the sum of
+the individual bands independently for each axis.  In this case the 
+color values will fill the entire -1:1 parameter space.
+
+If the total energy band is specified, then it may be the case that only
+part of the parameter space is filled. 
+
+The top plot uses a broad band for the total band: `B=S+M+H`.
+In this case the color-color diagram can only take values that are 
+in the gray-shaded triangular region.
+
 
 
 ## Background
 
 Background is not treated specifically with these routines, but you can
 include the background term in the model expression, something like
-
 
 ```python
 mymodel = ui.xswabs.abs1 * ui.xspowerlaw.pwrlaw + ui.const1d.bkg
