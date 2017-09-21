@@ -225,6 +225,7 @@ class ColorColor(object):
     kind of color-color plot w/ an assumed spectral model shape, then you can
     guestimate the actual model parameter w/o needing to fit the data.
 
+    Example:
 
     >>> mymodel = xswabs.abs1 * xspowerlaw.pwrlaw
     >>> arffile = "acissD2006-10-26pimmsN0009.fits"
@@ -514,10 +515,10 @@ def test():
     # Get to work.  
     #
     ao09 = ColorColor( mymodel, arffile )
-    matrix_09 = ao09( photon_index, absorption, soft, medium, hard, broad )
+    matrix_09 = ao09( photon_index, absorption, soft, medium, hard, broad)
 
     ao19 = ColorColor( mymodel, "acissD2016-11-22pimmsN0019.fits" )
-    matrix_19 = ao19( photon_index, absorption, soft, medium, hard,None)
+    matrix_19 = ao19( photon_index, absorption, soft, medium, hard, broad)
 
     photon_index.set_curve_style("symbol.style=none line.style=solid line.thickness=2 stem=PhoIndexLine" )
     photon_index.set_label_style("halign=0 valign=0 stem=PhoIndexLab")
@@ -525,16 +526,16 @@ def test():
     absorption.set_label_style("halign=0 valign=0 color=forest stem=nHLab")
 
     chips.clear()
-    chips.add_window( 1024,640)
-    chips.split(1,2)
-    chips.set_current_plot("plot1")
+    #chips.add_window( 1024,640)
+    #chips.split(1,2)
+    #chips.set_current_plot("plot1")
     matrix_09.plot()
 
-    chips.set_current_plot("plot2")
-    matrix_19.plot()
+    #chips.set_current_plot("plot2")
+    #matrix_19.plot()
 
     chips.print_window("cc.png", "export.clobber=True")
 
 
-test()
+#test()
 
