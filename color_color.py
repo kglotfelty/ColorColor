@@ -1,8 +1,29 @@
+#! /usr/bin/env python
+
+#
+# Copyright (C) 2017 Smithsonian Astrophysical Observatory
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+#
+
 
 from numpy import interp,arange
 import sherpa.astro.ui as ui
 import pychips as chips
-
+import sys
+sys.tracebacklimit=999
 
 def make_acis_diagonal_rmf( arf ):
     """
@@ -292,6 +313,9 @@ class ColorColor(object):
         """
         ui.dataspace1d( 1, 1024, id=self._dataset_id, dstype=ui.DataPHA)
         ui.set_model(self._dataset_id, self.model)
+
+        self.model = ui.get_source(self._dataset_id)
+        
         ui.load_arf( self._dataset_id, self.arffile )
         arf = ui.get_arf(self._dataset_id)
         if self.rmffile is None:
@@ -500,13 +524,12 @@ class ColorColorDiagram(object):
         set_key( self._cr, "HBAND_HI",self.cc.xx.hard.hi, unit="keV", 
             desc="{} band high energy".format(self.cc.xx.hard.token))
         
-        if self.cc.xx.hard is not None:
-            set_key( self._cr, "TBAND_LO",self.cc.xx.total.lo, unit="keV", 
+        if self.cc.xx.total is not None:
+            set_key( self._cr, "BBAND_LO",self.cc.xx.total.lo, unit="keV", 
                 desc="Total {} band low energy".format(self.cc.xx.total.token))
-            set_key( self._cr, "TBAND_HI",self.cc.xx.total.hi, unit="keV", 
+            set_key( self._cr, "BBAND_HI",self.cc.xx.total.hi, unit="keV", 
                 desc="Total {} band high energy".format(self.cc.xx.total.token))
-            
-        
+                    
 
     def write(self, outfile):
         """
@@ -515,7 +538,7 @@ class ColorColorDiagram(object):
         """
         self._write_columns(outfile)
         self._write_keywords()                
-        self._cr.write(outfile)
+        self._cr.write(outfile, clobber=True)
         
 
     def plot(self):
@@ -570,6 +593,82 @@ class ColorColorDiagram(object):
         else:
             chips.add_region( [1, -1, 0], [0, 1, -1 ])
         chips.set_region( "depth=99 fill.color=gray edge.color=gray opacity=0.35")
+
+
+toolname = "color_color"
+__revision__ = "22 September 2017"
+
+import ciao_contrib.logger_wrapper as lw
+lw.initialize_logger(toolname)
+lgr = lw.get_logger(toolname)
+
+
+def tool():    
+    modelstr = "xswabs.abs1*xspowerlaw.pwrlaw"
+    arffile = "acissD2006-10-26pimmsN0009.fits"
+    rmffile = ""
+    param1 = "pwrlaw.PhoIndex"
+    param1_grid = "1,2,3,4"
+    param2 = "abs1.nH"
+    param2_grid = "0.01,0.1,0.2,0.5,1,10"
+    soft = "csc" # "0.5:1.2"
+    medium = "csc" # "1.2:2.0"
+    hard = "csc" # "2.0:7.0"
+    broad= "csc" # ""
+    outfile="goo.fits"
+    clobber=True
+    verbose=0
+    
+
+    from ciao_contrib._tools.fileio import outfile_clobber_checks
+
+    outfile_clobber_checks( clobber, outfile )
+
+    # Setup the ColorColor object first.  Need this
+    # so that model parameters are created.
+    if 0 == len(rmffile) or 'none' == rmffile.lower():
+        rmffile = None
+    cc = ColorColor( modelstr, arffile, rmffile=rmffile)
+
+    # Create the two model parameters to be varied
+    import stk as stk
+    p1 = eval(param1)
+    p2 = eval(param2)
+    p1_grid = stk.build(param1_grid)
+    p2_grid = stk.build(param2_grid)
+    mp1 = ModelParameter( p1, p1_grid, fine_grid_resolution=1)
+    mp2 = ModelParameter( p2, p2_grid, fine_grid_resolution=1)
+    
+    # Setup the energy bands
+    def make_energy( band, token):
+
+        _csc = { 'S':'0.5:1.2', 'M':'1.2:2.0', 'H':'2.0:7.0', 'B':'0.5:7.0', 'U':'0.2:0.5', 'W':'0.1:10.0'}
+        
+        if band.lower() == 'csc':
+            if token in _csc:
+                band = _csc[token]
+            else:
+                raise ValueError("Unknown CSC band")
+
+        if 0 == len(band) or 'none' == band.lower():
+            et = None
+        else:
+            bb = [float(x) for x in band.split(":")]
+            et = EnergyBand( bb[0], bb[1], token)
+        return(et)
+    
+    eL = make_energy( soft, 'S')
+    eM = make_energy( medium, 'M')
+    eH = make_energy( hard, 'H' )
+    eT = make_energy( broad, 'B' )
+
+    # Go to work
+    matrix = cc( mp1, mp2, eL, eM, eH, eT)
+    matrix.write( outfile)
+    
+    # from ciao_contrib.runtool import add_tool_history
+    # add_tool_history( outfile, toolname, pars, toolversion=__revision__)
+
 
 
 
@@ -630,5 +729,5 @@ def test():
     chips.print_window("cc.png", "export.clobber=True")
 
 
-test()
-
+#test()
+tool()
