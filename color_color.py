@@ -110,7 +110,10 @@ class ModelParameter(object):
         x_in = arange( len(self._pgrid) )
         x_out = arange( self._fine_grid_resolution*len(self._pgrid))/float(self._fine_grid_resolution)
         y_out = interp( x_out, x_in, self._pgrid )
-        return( y_out)
+        
+        ymax = self._fine_grid_resolution*(len(self._pgrid)-1)+1
+        
+        return( y_out[0:ymax])
 
     @property
     def obj(self):
@@ -266,11 +269,12 @@ class ColorColor(object):
         """
         self.model = model        
         self.arffile = arffile
-        self._load( arffile, rmffile )
+        self.rmffile = rmffile
+        self._load()
         self.make_axis = axis_class
 
 
-    def _load(self, arffile, rmffile ):
+    def _load(self):
         """
         Setup sherpa dataset, set model, arf, rmf
         
@@ -288,13 +292,13 @@ class ColorColor(object):
         """
         ui.dataspace1d( 1, 1024, id=self._dataset_id, dstype=ui.DataPHA)
         ui.set_model(self._dataset_id, self.model)
-        ui.load_arf( self._dataset_id, arffile )
+        ui.load_arf( self._dataset_id, self.arffile )
         arf = ui.get_arf(self._dataset_id)
-        if rmffile is None:
+        if self.rmffile is None:
             rmf = make_acis_diagonal_rmf(arf)
             ui.set_rmf( self._dataset_id, rmf)
         else:
-            ui.load_rmf(rmffile)
+            ui.load_rmf(self.rmffile)
 
 
     def _setx(self, soft_band, hard_band, total_band):
@@ -427,6 +431,93 @@ class ColorColorDiagram(object):
         self.matrix = values
         self.square = square
         
+
+    def _write_columns(self, outfile):
+        # Column values
+        out_pri = []
+        out_sec = []
+        out_hm = []
+        out_ms = []
+
+        sec_fine_grid = self.sec_param.finegrid()        
+        res = self.sec_param._fine_grid_resolution
+        for a1 in self.pri_param.grid:
+            xx = self.matrix[a1,None][0]
+            yy = self.matrix[a1,None][1]
+            pri_grid = [a1]*len(xx)
+        
+            assert len(xx)==len(sec_fine_grid)
+
+            # Only write out the results on the user grid -- not on the fine grid.
+            out_pri.extend(pri_grid[::res])
+            out_sec.extend(sec_fine_grid[::res])
+            out_hm.extend(xx[::res])
+            out_ms.extend(yy[::res])
+            
+
+        # Create output crate
+        from crates_contrib.utils import make_table_crate
+
+        # Column names 
+        pri_col_name = self.pri_param.obj.name
+        sec_col_name = self.sec_param.obj.name
+        hm_col_name = "HM"
+        ms_col_name = "MS"
+        
+        out_cr = make_table_crate(out_pri,out_sec,out_hm,out_ms, 
+            colnames = [pri_col_name, sec_col_name, hm_col_name, ms_col_name])
+
+        self._cr = out_cr
+
+
+
+    def _write_keywords(self):
+        # Add a bunch of meta-data
+        from pycrates import set_key
+        import os as os
+        set_key( self._cr, "SHRPAVER",  ui._sherpa_version_string  )
+        set_key( self._cr, "MODEL", self.cc.model.name )
+        set_key( self._cr, "ARFFILE", os.path.basename(self.cc.arffile))
+
+        if self.cc.rmffile is None:            
+            set_key( self._cr, "RMFFILE", "NONE", desc="diagnonal RMF was used")
+        else:
+            set_key( self._cr, "RMFFILE", os.path.basename(self.cc.rmffile))
+
+        set_key( self._cr, "HMCOL", self.cc.xx.label )
+        set_key( self._cr, "MSCOL", self.cc.yy.label )
+
+        set_key( self._cr, "SBAND_LO",self.cc.yy.soft.lo, unit="keV", 
+            desc="{} band low energy".format(self.cc.yy.soft.token))
+        set_key( self._cr, "SBAND_HI",self.cc.yy.soft.hi, unit="keV", 
+            desc="{} band high energy".format(self.cc.yy.soft.token))
+        set_key( self._cr, "MBAND_LO",self.cc.yy.hard.lo, unit="keV", 
+            desc="{} band low energy".format(self.cc.yy.hard.token))
+        set_key( self._cr, "MBAND_HI",self.cc.yy.hard.hi, unit="keV", 
+            desc="{} band high energy".format(self.cc.yy.hard.token))
+        set_key( self._cr, "HBAND_LO",self.cc.xx.hard.lo, unit="keV", 
+            desc="{} band low energy".format(self.cc.xx.hard.token))
+        set_key( self._cr, "HBAND_HI",self.cc.xx.hard.hi, unit="keV", 
+            desc="{} band high energy".format(self.cc.xx.hard.token))
+        
+        if self.cc.xx.hard is not None:
+            set_key( self._cr, "TBAND_LO",self.cc.xx.total.lo, unit="keV", 
+                desc="Total {} band low energy".format(self.cc.xx.total.token))
+            set_key( self._cr, "TBAND_HI",self.cc.xx.total.hi, unit="keV", 
+                desc="Total {} band high energy".format(self.cc.xx.total.token))
+            
+        
+
+    def write(self, outfile):
+        """
+        Write out the results
+        
+        """
+        self._write_columns(outfile)
+        self._write_keywords()                
+        self._cr.write(outfile)
+        
+
     def plot(self):
         """
         Plot the color-color diagram to the
@@ -502,14 +593,14 @@ def test():
     # First model parameter axis
     #
     pho_grid = [ 1., 2., 3., 4. ]
-    photon_index = ModelParameter( pwrlaw.PhoIndex, pho_grid)
+    photon_index = ModelParameter( pwrlaw.PhoIndex, pho_grid, fine_grid_resolution=20)
 
     #
     # Second model parameter axis
     # 
     sg = [ 1.e20, 1.e21, 2.e21, 5.e21, 1.e22, 1e23] 
     nh_grid = [x/1e22 for x in sg ]
-    absorption = ModelParameter( abs1.nH, nh_grid)
+    absorption = ModelParameter( abs1.nH, nh_grid, fine_grid_resolution=20)
 
     #
     # Get to work.  
@@ -525,11 +616,13 @@ def test():
     absorption.set_curve_style("symbol.style=none line.style=shortdash line.thickness=2 line.color=forest stem=nHLine")
     absorption.set_label_style("halign=0 valign=0 color=forest stem=nHLab")
 
-    chips.clear()
+    #chips.clear()
     #chips.add_window( 1024,640)
     #chips.split(1,2)
     #chips.set_current_plot("plot1")
     matrix_09.plot()
+
+    matrix_09.write('foo.fits')
 
     #chips.set_current_plot("plot2")
     #matrix_19.plot()
@@ -537,5 +630,5 @@ def test():
     chips.print_window("cc.png", "export.clobber=True")
 
 
-#test()
+test()
 
