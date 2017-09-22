@@ -641,7 +641,6 @@ def tool():
     
     # Setup the energy bands
     def make_energy( band, token):
-
         _csc = { 'S':'0.5:1.2', 'M':'1.2:2.0', 'H':'2.0:7.0', 'B':'0.5:7.0', 'U':'0.2:0.5', 'W':'0.1:10.0'}
         
         if band.lower() == 'csc':
