@@ -8,7 +8,7 @@ The hardness ratio is the ratio of the difference in the
 number of counts in two independent energy bands divided by the
 total number of counts.  The total number of counts may be the sum of
 the two energy bands, or may be the total over a wider energy range
-that full encloses 
+that full encloses the bands being used.
 
 Thus defined, the hardness ratio will be between -1 and 1.   Values closer
 to -1 are "soft", low energy band dominates.  Values closer to 1 are "hard",
@@ -40,7 +40,6 @@ with minimal changes.
 from color_color import *
 
 import sherpa.astro.ui as ui
-import pychips as chips
 
 #
 # Define our energy bands
@@ -71,20 +70,17 @@ absorption = ModelParameter( abs1.nH, nh_grid)
 #
 # Get to work.  
 #
-ao09 = ColorColor( mymodel, arffile )
-matrix_09 = ao09( photon_index, absorption, soft, medium, hard, None)
+hm_ms = ColorColor( mymodel, arffile )
+hm_ms_results = hm_ms( photon_index, absorption, soft, medium, hard, None)
 
 #
 # Setup plot styles
 #
-photon_index.set_curve_style("symbol.style=none line.style=solid line.thickness=2 stem=PhoIndexLine" )
-photon_index.set_label_style("halign=0 valign=0 stem=PhoIndexLab")
-absorption.set_curve_style("symbol.style=none line.style=shortdash line.thickness=2 line.color=forest stem=nHLine")
-absorption.set_label_style("halign=0 valign=0 color=forest stem=nHLab")
+photon_index.set_curve_style("symbol.style=none" )
+absorption.set_curve_style("symbol.style=none line.style=shortdash line.color=forest")
+absorption.set_label_style("color=forest")
 
-chips.clear()
-matrix_09.plot()
-chips.print_window("color_color.png", "export.clobber=True")
+hm_ms_results.plot()
 
 ```
 
@@ -123,5 +119,5 @@ bkg.c0 = 0.01
 ```
 
 to see how it affects things.  The background model component 
-can be as complicated as 
+can be as complicated as needed.
 
