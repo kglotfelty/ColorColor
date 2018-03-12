@@ -121,6 +121,7 @@ class ModelParameter(object):
         self._pobj = parameter_object
         self._pgrid = parameter_value_grid
         self._fine_grid_resolution = fine_grid_resolution
+        self._lab_style = ""
         
 
     def finegrid( self ):
