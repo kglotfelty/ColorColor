@@ -19,9 +19,8 @@
 #
 
 
-from numpy import interp,arange
+import numpy as np
 import sherpa.astro.ui as ui
-import pychips as chips
 import sys
 sys.tracebacklimit=999
 
@@ -51,10 +50,10 @@ def make_acis_diagonal_rmf( arf ):
 
     n_grp = [1]*n_energies
     n_chan = [1]*n_energies
-    matrix = [1]*n_energies
+    matrix = np.array([1.0]*n_energies)
     f_chan = [ int(e/acis_gain)+1 for e in _emid]
 
-    eb_lo = arange(detchans)*acis_gain
+    eb_lo = np.arange(detchans)*acis_gain
     eb_hi = eb_lo + acis_gain
     eb_lo[0]=0.001
     
@@ -63,8 +62,6 @@ def make_acis_diagonal_rmf( arf ):
 
     rmf = RMF1D( _rmf )
     return(rmf)
-
-
 
 
 class EnergyBand(object):
@@ -94,7 +91,6 @@ class EnergyBand(object):
         return(self._token)
 
 
-
 class ModelParameter(object):
     """Hold info about each model parameter that is to be varied
     
@@ -121,7 +117,8 @@ class ModelParameter(object):
         self._pobj = parameter_object
         self._pgrid = parameter_value_grid
         self._fine_grid_resolution = fine_grid_resolution
-        self._lab_style = ""
+        self._lab_style = {  "color":"black" }
+        self._curve_style = { "color":"black", "linestyle":"-" }
         
 
     def finegrid( self ):
@@ -129,9 +126,10 @@ class ModelParameter(object):
         This is a simple linear interpolation -- you could replace w/ 
         more fancy function but this is good enough for plotting methinks.
         """
-        x_in = arange( len(self._pgrid) )
-        x_out = arange( self._fine_grid_resolution*len(self._pgrid))/float(self._fine_grid_resolution)
-        y_out = interp( x_out, x_in, self._pgrid )
+        x_in = np.arange( len(self._pgrid) )
+        x_out = np.arange( self._fine_grid_resolution*len(self._pgrid))/float(self._fine_grid_resolution)
+        
+        y_out = np.interp( x_out, x_in, self._pgrid )
         
         ymax = self._fine_grid_resolution*(len(self._pgrid)-1)+1
         
@@ -155,12 +153,12 @@ class ModelParameter(object):
         "Get the label style for plotting"
         return(self._lab_style)
 
-    def set_curve_style(self, style):
+    def set_curve_style(self, **style):
         "Set the curve style for plotting"
         self._curve_style = style
 
     
-    def set_label_style(self, style ):
+    def set_label_style(self, **style ):
         "Set the label style for plotting"
         self._lab_style = style
 
@@ -224,7 +222,6 @@ class HardnessRatioAxis(object):
         label = "{}/{}".format(numerator,denominator)
         return(label)
         
-
 
 class ColorColor(object):
     """
@@ -443,7 +440,6 @@ class ColorColor(object):
         return(matrix)
 
 
-
 class ColorColorDiagram(object):
     """
     Object to plot the color-color diagram
@@ -542,62 +538,70 @@ class ColorColorDiagram(object):
         self._cr.write(outfile, clobber=True)
         
 
-    def plot(self):
+    def plot(self, outfile):
         """
-        Plot the color-color diagram to the
+        Plot the color-color diagram -- now using matplotlib
         
         Since this object contains a refernce to the primary and
         secondary parameters, you can set/change the curve and
         label properties before plotting:
         
         >>> matrix = cc( photon_index, absorption, soft, medium, hard, broad)
-        >>> photon_index.set_curve_style("symbol.style=none line.style=solid line.thickness=2" )
-        >>> photon_index.set_label_style("halign=-0.5 valign=0.5")
-        >>> absorption.set_curve_style("symbol.style=none line.style=shortdash line.thickness=2 line.color=forest")
-        >>> absorption.set_label_style("halign=-0.5 valign=0.5 color=forest")
+        >>> photon_index.set_curve_style(marker="", color="green", linestyle="-", linewidth=2)
+        >>> photon_index.set_label_style(color="green")
+        >>> absorption.set_curve_style(marker="", color="black", linestyle="-.")
+        >>> absorption.set_label_style(color="black")
         >>> matrix.plot()        
         """
+        import matplotlib.pylab as plt
 
-        # Plot 1st model parameter curves
-        
+        # Plot 1st model parameter curves        
         for a1 in self.pri_param.grid:
             xx = self.matrix[a1,None][0]
             yy = self.matrix[a1,None][1]
-            chips.add_curve(xx,yy, self.pri_param.curve_style)
+
+            plt.plot(xx,yy,**self.pri_param.curve_style )
             
             if a1 == self.pri_param.grid[-1]:
                 lab = "{}={}".format(self.pri_param.obj.name, a1)
             else:
                 lab = "{}".format(a1)
-            chips.add_label( xx[0], yy[0], lab, self.pri_param.label_style)
+            
+            plt.text( xx[0], yy[0], lab, **self.pri_param.label_style)
 
         # Plot 2nd model parameter curves
         for a2 in self.sec_param.grid:
             xx = self.matrix[None,a2][0]
             yy = self.matrix[None,a2][1]
-            chips.add_curve(xx,yy, self.sec_param.curve_style)
+            plt.plot(xx,yy, **self.sec_param.curve_style)
 
             if a2 == self.sec_param.grid[-1]:
                 lab = "{}={}".format(self.sec_param.obj.name, a2)
             else:
                 lab = "{}".format(a2)
-            chips.add_label( xx[0], yy[0], lab, self.sec_param.label_style)
+            plt.text( xx[0], yy[0], lab, **self.sec_param.label_style)
 
         # Add labels and limits
-        chips.limits(chips.XY_AXIS, -1.1, 1.1)
-        chips.set_data_aspect_ratio("1:1")
-        chips.set_plot_xlabel( self.cc.xx.label )
-        chips.set_plot_ylabel( self.cc.yy.label)
-        chips.set_plot_title( "{} :: {}".format( self.cc.model.name, self.cc.arffile.replace("_",r"\_")))
+        plt.xlim(-1.1, 1.1)
+        plt.ylim(-1.1, 1.1)
+        
+        plt.gca().set_aspect('equal', 'box')
+
+        plt.xlabel(self.cc.xx.label)
+        plt.ylabel(self.cc.yy.label)
+        plt.title( "{} :: {}".format( self.cc.model.name, self.cc.arffile))
+
         if self.square:
-            chips.add_region( [-1,1, 1, -1], [-1,-1, 1,1] )        
+            px,py = ( [-1,1, 1, -1], [-1,-1, 1,1] )        
         else:
-            chips.add_region( [1, -1, 0], [0, 1, -1 ])
-        chips.set_region( "depth=99 fill.color=gray edge.color=gray opacity=0.35")
+            px,py = ( [1, -1, 0], [0, 1, -1 ])
+        plt.fill( px, py, color="lightgray")
+        
+        plt.savefig(outfile)
 
 
 toolname = "color_color"
-__revision__ = "22 September 2017"
+__revision__ = "20 December 2019"
 
 import ciao_contrib.logger_wrapper as lw
 lw.initialize_logger(toolname)
@@ -609,20 +613,21 @@ def tool():
     arffile = "acissD2006-10-26pimmsN0009.fits"
     rmffile = ""
     param1 = "pwrlaw.PhoIndex"
-    param1_grid = "1,2,3,4"
+    param1_grid = "0.1,0.2,0.5,1,1.5,2,3,4"
     param2 = "abs1.nH"
     param2_grid = "0.01,0.1,0.2,0.5,1,10"
     soft = "csc" # "0.5:1.2"
     medium = "csc" # "1.2:2.0"
     hard = "csc" # "2.0:7.0"
-    broad= "csc" # ""
+    broad= "none" # "csc" # ""
+    finegrid_sample=20
     outfile="goo.fits"
     clobber=True
+    out_plot = "foo.png"
     verbose=0
     
 
     from ciao_contrib._tools.fileio import outfile_clobber_checks
-
     outfile_clobber_checks( clobber, outfile )
 
     # Setup the ColorColor object first.  Need this
@@ -635,10 +640,10 @@ def tool():
     import stk as stk
     p1 = eval(param1)
     p2 = eval(param2)
-    p1_grid = stk.build(param1_grid)
-    p2_grid = stk.build(param2_grid)
-    mp1 = ModelParameter( p1, p1_grid, fine_grid_resolution=1)
-    mp2 = ModelParameter( p2, p2_grid, fine_grid_resolution=1)
+    p1_grid = [float(x) for x in stk.build(param1_grid)]
+    p2_grid = [float(x) for x in stk.build(param2_grid)]
+    mp1 = ModelParameter( p1, p1_grid, fine_grid_resolution=finegrid_sample)
+    mp2 = ModelParameter( p2, p2_grid, fine_grid_resolution=finegrid_sample)
     
     # Setup the energy bands
     def make_energy( band, token):
@@ -665,9 +670,18 @@ def tool():
     # Go to work
     matrix = cc( mp1, mp2, eL, eM, eH, eT)
     matrix.write( outfile)
+
+    if len(out_plot)>0 and "none" != out_plot.lower():
+        mp1.set_curve_style(color="forestgreen", linestyle="--", marker="")
+        mp2.set_curve_style(color="black", linestyle="-", marker="")
+        mp1.set_label_style(color="forestgreen")
+        mp2.set_label_style(color="black")
+        matrix.plot(out_plot)
+        import matplotlib.pylab as plt
+        plt.show()
     
-    # from ciao_contrib.runtool import add_tool_history
-    # add_tool_history( outfile, toolname, pars, toolversion=__revision__)
+    #from ciao_contrib.runtool import add_tool_history
+    #add_tool_history( outfile, toolname, pars, toolversion=__revision__)
 
 
 
@@ -710,23 +724,20 @@ def test():
     ao19 = ColorColor( mymodel, "acissD2016-11-22pimmsN0019.fits" )
     matrix_19 = ao19( photon_index, absorption, soft, medium, hard, broad)
 
-    photon_index.set_curve_style("symbol.style=none line.style=solid line.thickness=2 stem=PhoIndexLine" )
-    photon_index.set_label_style("halign=0 valign=0 stem=PhoIndexLab")
-    absorption.set_curve_style("symbol.style=none line.style=shortdash line.thickness=2 line.color=forest stem=nHLine")
-    absorption.set_label_style("halign=0 valign=0 color=forest stem=nHLab")
+    photon_index.set_curve_style(marker="", linestyle="-", linewidth=2, color="black")
+    photon_index.set_label_style(color="black")
+    absorption.set_curve_style(marker="", linestyle="-", linewidth=2, color="forestgreen")
+    absorption.set_label_style(color="forestgreen")
 
-    #chips.clear()
-    #chips.add_window( 1024,640)
-    #chips.split(1,2)
-    #chips.set_current_plot("plot1")
     matrix_09.plot()
+    import matplotlib.pylab as plt
+    plt.show()
 
     matrix_09.write('foo.fits')
 
-    #chips.set_current_plot("plot2")
-    #matrix_19.plot()
+    matrix_19.plot()
+    plt.show()
 
-    chips.print_window("cc.png", "export.clobber=True")
 
 
 #test()

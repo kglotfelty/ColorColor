@@ -29,9 +29,7 @@ spectral model shape, you can get an estimate of the model **parameters**
 by looking at the color-color diagram.
 
 These routines are dependent on [Sherpa](http://cxc.cfa.harvard.edu/sherpa)
-for the models.  They also use [ChIPS](http://cxc.cfa.harvard.edu/chips) 
-for the plotting; though one could swap in another plotting engine
-with minimal changes.
+for the models. Plotting is done using matplotlib.
 
 
 ## Example
@@ -76,11 +74,11 @@ hm_ms_results = hm_ms( photon_index, absorption, soft, medium, hard, None)
 #
 # Setup plot styles
 #
-photon_index.set_curve_style("symbol.style=none" )
-absorption.set_curve_style("symbol.style=none line.style=shortdash line.color=forest")
-absorption.set_label_style("color=forest")
+photon_index.set_curve_style(marker="", color="black" )
+absorption.set_curve_style(marker="", linestyle="--", color="forestgreen") 
+absorption.set_label_style(color="forestgreen")
 
-hm_ms_results.plot()
+hm_ms_results.plot("color_color.png")
 
 ```
 
