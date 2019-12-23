@@ -1,7 +1,7 @@
-#! /usr/bin/env python
+#!/usr/bin/env python
 
 #
-# Copyright (C) 2017 Smithsonian Astrophysical Observatory
+# Copyright (C) 2017, 2019 Smithsonian Astrophysical Observatory
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,6 +23,10 @@ import numpy as np
 import sherpa.astro.ui as ui
 import sys
 sys.tracebacklimit=999
+
+
+__all__ = [ "EnergyBand", "ModelParameter", "HardnessRatioAxis", 
+            "ColorColor", "ColorColorDiagram" ]
 
 def make_acis_diagonal_rmf( arf ):
     """
@@ -600,91 +604,6 @@ class ColorColorDiagram(object):
         plt.savefig(outfile)
 
 
-toolname = "color_color"
-__revision__ = "20 December 2019"
-
-import ciao_contrib.logger_wrapper as lw
-lw.initialize_logger(toolname)
-lgr = lw.get_logger(toolname)
-
-
-def tool():    
-    modelstr = "xswabs.abs1*xspowerlaw.pwrlaw"
-    arffile = "acissD2006-10-26pimmsN0009.fits"
-    rmffile = ""
-    param1 = "pwrlaw.PhoIndex"
-    param1_grid = "0.1,0.2,0.5,1,1.5,2,3,4"
-    param2 = "abs1.nH"
-    param2_grid = "0.01,0.1,0.2,0.5,1,10"
-    soft = "csc" # "0.5:1.2"
-    medium = "csc" # "1.2:2.0"
-    hard = "csc" # "2.0:7.0"
-    broad= "none" # "csc" # ""
-    finegrid_sample=20
-    outfile="goo.fits"
-    clobber=True
-    out_plot = "foo.png"
-    verbose=0
-    
-
-    from ciao_contrib._tools.fileio import outfile_clobber_checks
-    outfile_clobber_checks( clobber, outfile )
-
-    # Setup the ColorColor object first.  Need this
-    # so that model parameters are created.
-    if 0 == len(rmffile) or 'none' == rmffile.lower():
-        rmffile = None
-    cc = ColorColor( modelstr, arffile, rmffile=rmffile)
-
-    # Create the two model parameters to be varied
-    import stk as stk
-    p1 = eval(param1)
-    p2 = eval(param2)
-    p1_grid = [float(x) for x in stk.build(param1_grid)]
-    p2_grid = [float(x) for x in stk.build(param2_grid)]
-    mp1 = ModelParameter( p1, p1_grid, fine_grid_resolution=finegrid_sample)
-    mp2 = ModelParameter( p2, p2_grid, fine_grid_resolution=finegrid_sample)
-    
-    # Setup the energy bands
-    def make_energy( band, token):
-        _csc = { 'S':'0.5:1.2', 'M':'1.2:2.0', 'H':'2.0:7.0', 'B':'0.5:7.0', 'U':'0.2:0.5', 'W':'0.1:10.0'}
-        
-        if band.lower() == 'csc':
-            if token in _csc:
-                band = _csc[token]
-            else:
-                raise ValueError("Unknown CSC band")
-
-        if 0 == len(band) or 'none' == band.lower():
-            et = None
-        else:
-            bb = [float(x) for x in band.split(":")]
-            et = EnergyBand( bb[0], bb[1], token)
-        return(et)
-    
-    eL = make_energy( soft, 'S')
-    eM = make_energy( medium, 'M')
-    eH = make_energy( hard, 'H' )
-    eT = make_energy( broad, 'B' )
-
-    # Go to work
-    matrix = cc( mp1, mp2, eL, eM, eH, eT)
-    matrix.write( outfile)
-
-    if len(out_plot)>0 and "none" != out_plot.lower():
-        mp1.set_curve_style(color="forestgreen", linestyle="--", marker="")
-        mp2.set_curve_style(color="black", linestyle="-", marker="")
-        mp1.set_label_style(color="forestgreen")
-        mp2.set_label_style(color="black")
-        matrix.plot(out_plot)
-        import matplotlib.pylab as plt
-        plt.show()
-    
-    #from ciao_contrib.runtool import add_tool_history
-    #add_tool_history( outfile, toolname, pars, toolversion=__revision__)
-
-
-
 
 def test():                
     #
@@ -737,8 +656,3 @@ def test():
 
     matrix_19.plot()
     plt.show()
-
-
-
-#test()
-tool()
