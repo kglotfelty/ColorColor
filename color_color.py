@@ -18,6 +18,12 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
+"""Color Color Plot maker
+
+Creates a plot showing how model parameters affect hardness ratios 
+given a user supplied ARF and RMF.
+
+"""
 
 import numpy as np
 import sherpa.astro.ui as ui
@@ -400,7 +406,7 @@ class ColorColor(object):
         return(retvals)
 
 
-    def __call__( self, pri_param, sec_param, soft_band, medium_band, hard_band, total_band ):
+    def __call__( self, pri_param, sec_param, soft_band, medium_band, hard_band, total_band=None ):
         """Compute the ColorColorDiagram values in the specified bands
         
         The two model parameters (pri_param, sec_param)
@@ -415,7 +421,7 @@ class ColorColor(object):
         The X-axis is hard-medium/hard+medium
         The Y-axis is medium-soft/medium+soft
 
-        >>> matrix = cc( photon_index, absorption, soft, medium, hard, broad)
+        >>> matrix = cc( photon_index, absorption, soft, medium, hard, broad,total=None)
 
         """
 
@@ -542,7 +548,7 @@ class ColorColorDiagram(object):
         self._cr.write(outfile, clobber=True)
         
 
-    def plot(self, outfile):
+    def plot(self, outfile=None):
         """
         Plot the color-color diagram -- now using matplotlib
         
@@ -601,7 +607,8 @@ class ColorColorDiagram(object):
             px,py = ( [1, -1, 0], [0, 1, -1 ])
         plt.fill( px, py, color="lightgray")
         
-        plt.savefig(outfile)
+        if outfile is not None:
+            plt.savefig(outfile)
 
 
 

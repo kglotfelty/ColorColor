@@ -69,7 +69,7 @@ absorption = ModelParameter( abs1.nH, nh_grid)
 # Get to work.  
 #
 hm_ms = ColorColor( mymodel, arffile )
-hm_ms_results = hm_ms( photon_index, absorption, soft, medium, hard, None)
+hm_ms_results = hm_ms( photon_index, absorption, soft, medium, hard)
 
 #
 # Setup plot styles
@@ -90,7 +90,7 @@ The output looks like
 Now suppose there was a source with `(H-M)=-0.25` and `(M-S)=-0.2`.
 If the assumption about the spectral model is correct, then it would 
 be expected to have a photon index between 2 and 3 and absorption between 0.2 and 0.5
-*10^22.
+e10^22.
 
 ## Total energy band
 
