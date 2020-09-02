@@ -1,18 +1,42 @@
 #!/usr/bin/env python
 
 
+# For ciao installed using ciao-install:
+#
+#     python setup.py build -e "/usr/bin/env python" install --prefix "$ASCDS_INSTALL/contrib" 
+#
+# For ciao installed using conda
+#
+#     python setup.py install
+
+
 import os
 import sys
 
-assert "ASCDS_INSTALL" in os.environ
+assert "ASCDS_INSTALL" in os.environ, "Please setup for CIAO before installing"
+
+from setuptools import setup
+from setuptools.command.install import install
 
 
-from distutils.core import setup
+class InstallAhelpWrapper(install):
+    'A simple wrapper to run ahelp -r after install to update ahelp index'
 
-"""
-python setup.py build --force -e '/usr/bin/env python' \
-  install --prefix=$ASCDS_INSTALL/contrib --force
-"""
+    @staticmethod
+    def update_ahelp_database():
+        print("Update ahelp database ...")
+        from subprocess import check_output
+        sout = check_output(["ahelp","-r"])
+        for line in sout.decode().split("\n"):
+            for summary in ["Processed", "Succeeded", "Failed", "Purged"]:
+                if line.startswith(summary):
+                    print("    "+line)
+
+    
+    def run(self):
+        install.run(self)
+        self.update_ahelp_database()
+
 
 
 setup( name='color_color',
@@ -23,5 +47,8 @@ setup( name='color_color',
         url='https://github.com/kglotfelty/ColorColor/',
         py_modules=["color_color",],
         scripts = ["color_color",],
-        data_files = [ ("param", ["color_color.par",])]
+        data_files = [ ("param", ["color_color.par",]),        
+                       ('share/doc/xml',['color_color.xml',])
+                     ],
+        cmdclass={'install': InstallAhelpWrapper},
         )

@@ -2,4 +2,5 @@ build
 __pycache__
 .ipynb_checkpoints
 *pimms*fits
+*egg-info
 
