@@ -40,9 +40,9 @@ class InstallAhelpWrapper(install):
 
 
 setup( name='color_color',
-        version='0.0.1',
+        version='4.13.0',
         description='CIAO color color (hardness ratio) diagram',
-        author='Anonymous',
+        author='Kenny Glotfelty',
         author_email='glotfeltyk@si.edu',
         url='https://github.com/kglotfelty/ColorColor/',
         py_modules=["color_color",],
