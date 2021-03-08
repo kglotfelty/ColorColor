@@ -84,8 +84,8 @@ def tool():
     cc = ColorColor( pars["model"], pars["infile"], rmffile=rmffile)
 
     # Create the two model parameters to be varied
-    mp1 = make_model( pars["1parameter"], pars["1grid"], pars["plot_oversample"])
-    mp2 = make_model( pars["2parameter"], pars["2grid"], pars["plot_oversample"])
+    mp1 = make_model( pars["param1"], pars["grid1"], pars["plot_oversample"])
+    mp2 = make_model( pars["param2"], pars["grid2"], pars["plot_oversample"])
     
     # Create the energy bands
     eL = make_energy( pars["soft"], 'S')

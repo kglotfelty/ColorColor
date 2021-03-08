@@ -73,10 +73,10 @@ each of the 3 user specified energy bands.
       <QEXAMPLE>
         <SYNTAX>
           <LINE>pset color_color model="xswabs.abs1*xspowerlaw.pwrlaw"</LINE>
-          <LINE>pset color_color 1param=pwrlaw.PhoIndex</LINE>
-          <LINE>pset color_color 1grid=1,2,3,4</LINE>
-          <LINE>pset color_color 2param=abs1.nH</LINE>          
-          <LINE>pset color_color 2grid=0.01,0.1,0.2,0.5,1,10</LINE>
+          <LINE>pset color_color param1=pwrlaw.PhoIndex</LINE>
+          <LINE>pset color_color grid1=1,2,3,4</LINE>
+          <LINE>pset color_color param2=abs1.nH</LINE>          
+          <LINE>pset color_color grid2=0.01,0.1,0.2,0.5,1,10</LINE>
           <LINE>pset color_color soft=csc medium=csc hard=csc</LINE>
           <LINE>color_color acis.arf clr.fits mode=h showplot=yes outplot=clr.png clob+</LINE>
         </SYNTAX>
@@ -223,7 +223,7 @@ and so on.  This provides a smoother curve.
        </DESC>
       </PARAM>
 
-      <PARAM  name="1parameter" reqd="yes" type="string">
+      <PARAM  name="param1" reqd="yes" type="string">
         <SYNOPSIS>
             The first parameter that will be varied to compute the
             color color plot.
@@ -235,37 +235,37 @@ and so on.  This provides a smoother curve.
           </PARA>
        </DESC>
       </PARAM>
-      <PARAM  name="1grid" reqd="yes" type="string">
+      <PARAM  name="grid1" reqd="yes" type="string">
         <SYNOPSIS>
           The grid of values for the 1st model parameter
         </SYNOPSIS>
        <DESC>
            <PARA>
-           The hardness ratios are compute with the 1parameter model parameter 
-           set to each of the values listed in the 1grid parameter.
+           The hardness ratios are compute with the param1 model parameter 
+           set to each of the values listed in the grid1 parameter.
            </PARA>
        </DESC>
       </PARAM>
-      <PARAM  name="2parameter" reqd="yes" type="string">
+      <PARAM  name="param2" reqd="yes" type="string">
         <SYNOPSIS>
             The second parameter that will be varied to compute the
             color-color plot.
         </SYNOPSIS>
        <DESC>
             <PARA>
-            Same as the 1parameter parameter, eg abs1.nH.
+            Same as the param1 parameter, eg abs1.nH.
             </PARA>
 
        </DESC>
       </PARAM>
-      <PARAM name="2grid" reqd="yes" type="string">
+      <PARAM name="grid2" reqd="yes" type="string">
         <SYNOPSIS>
             The grid of values for the 2nd model parameter        
         </SYNOPSIS>
        <DESC>
            <PARA>
-           The hardness ratios are compute with the 2parameter model parameter 
-           set to each of the values listed in the 2grid parameter.
+           The hardness ratios are compute with the param2 model parameter 
+           set to each of the values listed in the grid2 parameter.
            </PARA>
        </DESC>
       </PARAM>
