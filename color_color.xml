@@ -12,14 +12,14 @@
     <DESC>
       <PARA>
 In X-ray astronomy, we often use the term "color" to mean the
-"hardness ratio", &#8461;
+"hardness ratio", <!-- &#8461; -->H
 </PARA>
 <PARA>
-<EQUATION>&#8461; = (H-S)/(H+S)</EQUATION>
+<EQUATION><!-- &#8461; -->H = (h-s)/(h+s)</EQUATION>
 </PARA>
 <PARA>
-where H and S are the counts in two independent energy bands
-(Hard and Soft).  This ratio is restricted to the range
+where 'h' and 's' are the counts in two independent energy bands
+(hard and soft).  This ratio is restricted to the range
 [-1,1]. Values less than 0 indicate a "soft" source,
 values greater than 0 indicate a "hard" source.
       </PARA>
@@ -46,13 +46,14 @@ medium to soft.
 
 </PARA>
 <PARA>
-<EQUATION>&#8461;&#120132; = (H-M)/(H+M)</EQUATION>
-<EQUATION>&#120132;&#120138; = (M-S)/(M+S)</EQUATION>
+<EQUATION><!-- &#8461; -->H<!-- &#120132; -->M = (h-m)/(h+m)</EQUATION>
+<EQUATION><!-- &#120132; -->M<!-- &#120138; -->S = (m-s)/(m+s)</EQUATION>
 
 </PARA>
 <PARA>
 The color-color diagram then is constructed by plotting the
-&#8461;&#120132; and &#120132;&#120138; values and connecting the points
+<!-- &#8461; -->H<!-- &#120132; -->M and 
+<!-- &#120132; -->M<!-- &#120138; -->S values and connecting the points
 that represent fixed values for each of the two model parameters.
 Users can then compute the hardness ratios for the sources in their
 observations and use the color-color plot to look-up what spectral
@@ -371,8 +372,6 @@ and so on.  This provides a smoother curve.
         Amount of tool chatter level.
        </SYNOPSIS>
       </PARAM>
-
-
 
    </PARAMLIST>
 
