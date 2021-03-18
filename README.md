@@ -32,7 +32,42 @@ These routines are dependent on [Sherpa](http://cxc.cfa.harvard.edu/sherpa)
 for the models. Plotting is done using matplotlib.
 
 
-## Example
+## Examples
+
+### Command line tool
+
+The plot shown above was created using the following command line
+
+```bash
+$ color_color acis.arf clr.fits mode=h showplot=yes outplot=clr.png \
+    model="xswabs.abs1*xspowerlaw.pwrlaw" \
+    param1=pwrlaw.PhoIndex \
+    grid1=1,2,3,4 \
+    param2=abs1.nH \
+    grid2=0.01,0.1,0.2,0.5,1,10 \
+    soft=csc medium=csc hard=csc \
+    clobber=yes
+```
+
+The values are also stored in the output file `clr.fits`
+
+```bash
+$ dmlist clr.fits cols
+ 
+--------------------------------------------------------------------------------
+Columns for Table Block TABLE
+--------------------------------------------------------------------------------
+ 
+ColNo  Name                 Unit        Type             Range
+   1   PhoIndex                          Real8          -Inf:+Inf            
+   2   nH                                Real8          -Inf:+Inf            
+   3   HM                                Real8          -Inf:+Inf            
+   4   MS                                Real8          -Inf:+Inf            
+```
+
+
+
+### `Python` module
 
 ```python
 from color_color import *
@@ -100,10 +135,6 @@ color values will fill the entire -1:1 parameter space.
 
 If the total energy band is specified, then it may be the case that only
 part of the parameter space is filled. 
-
-The top plot uses a broad band for the total band: `B=S+M+H`.
-In this case the color-color diagram can only take values that are 
-in the gray-shaded triangular region.
 
 
 ## Background
