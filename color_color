@@ -24,9 +24,10 @@ import sys
 
 import ciao_contrib.logger_wrapper as lw
 from color_color import *
+import numpy as np
 
 toolname = "color_color"
-__revision__ = "20 December 2019"
+__revision__ = "04 March 2022"
 
 lw.initialize_logger(toolname)
 lgr = lw.get_logger(toolname)
@@ -80,6 +81,12 @@ def tool():
     clobber = (pars["clobber"] == "yes")
     outfile_clobber_checks(clobber, pars["outfile"])
     outfile_clobber_checks(clobber, pars["outplot"])
+
+    # Set numpy random seed (used by fake)
+    if int(pars["random_seed"]) < 0:
+        from random import getrandbits
+        pars["random_seed"] = str(getrandbits(29))
+    np.random.seed(int(pars["random_seed"]))
 
     # Setup the ColorColor object first.  Need this
     # so that model parameters are created.

@@ -327,7 +327,7 @@ class ColorColor():
             rmf = make_acis_diagonal_rmf(arf)
             ui.set_rmf(self._dataset_id, rmf)
         else:
-            ui.load_rmf(self.rmffile)
+            ui.load_rmf(self._dataset_id, self.rmffile)
 
     def _setx(self, soft_band, hard_band, total_band):
         """Compute the HR for the X-axis"""
