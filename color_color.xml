@@ -42,7 +42,7 @@ By including the instrument response, we can then simulate the
 observed spectra.  We compute the total number of simulated counts
 in 3 independent energy bands: soft, medium, hard; and then use those
 counts to construct a pair hardness ratios:  hard-to-medium and
-medium to soft.
+medium-to-soft.
 
 </PARA>
 <PARA>
@@ -63,7 +63,7 @@ model parameters yield the colors they computed.
 <PARA>
 The color_color script computes these hardness ratios by simulating the
 spectrum and folding it through the instrument response file (ARF).  It
-does this using the sherpa fake() command to generate the simulate
+does this using the sherpa fake() command to generate the simulated
 spectrum and the calc_data_sum() command to compute the counts in
 each of the 3 user specified energy bands.
 </PARA>
@@ -154,7 +154,6 @@ absorption.set_curve_style(marker="", linestyle="-", linewidth=2, color="forestg
 absorption.set_label_style(color="forestgreen")
 
 clr_out.plot()
-
 </VERBATIM>
 
 <PARA>
@@ -361,6 +360,18 @@ and so on.  This provides a smoother curve.
        </DESC>
       </PARAM>
 
+     <PARAM name="random_seed" type="integer" def="-1" min="-1">
+        <SYNOPSIS>
+          The seed value used to initialize the random number generator.
+        </SYNOPSIS>
+       <DESC>
+        <PARA>
+            Setting the value to -1 will use a randomly selected random
+            seed.
+        </PARA>
+       </DESC>
+     </PARAM>
+
       <PARAM def="no" name="clobber" type="boolean">
         <SYNOPSIS>
             Overwrite output files if they already exist?
@@ -385,7 +396,7 @@ and so on.  This provides a smoother curve.
       </PARA>
     </ADESC>
 
-    <LASTMODIFIED>September 2020</LASTMODIFIED>
+    <LASTMODIFIED>March 2022</LASTMODIFIED>
 
   </ENTRY>
 </cxchelptopics>
