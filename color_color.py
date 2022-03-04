@@ -216,7 +216,7 @@ class HardnessRatioAxis():
 
         hr = (hard-soft)/total
 
-        return hr
+        return hr, hard, soft
 
     @property
     def label(self):
@@ -380,6 +380,9 @@ class ColorColor():
             # Loop over the fine grid on secondary axis
             lx = []
             ly = []
+            lhard = []
+            lsoft = []
+            lmedium = []
             for bb in sec_fine_grid:
                 # Set sherpa model parameter value
                 setattr(sec_obj.obj, "val", bb)
@@ -388,14 +391,19 @@ class ColorColor():
                 self.fakeit()
 
                 # Compute the HR in 2 separate energy bands
-                xx = self.xx()
-                yy = self.yy()
+                xx, hard, medium= self.xx()
+                yy, medium2, soft = self.yy()
+
+                assert medium == medium2, "Whoops"
 
                 # Save the values
                 lx.append(xx)
                 ly.append(yy)
+                lhard.append(hard)
+                lsoft.append(soft)
+                lmedium.append(medium)
 
-            retvals[aa] = (lx, ly)
+            retvals[aa] = (lx, ly, lhard, lmedium, lsoft)
 
         return retvals
 
@@ -460,6 +468,9 @@ class ColorColorDiagram():
         # Column values
         out_pri = []
         out_sec = []
+        out_soft = []
+        out_medium = []
+        out_hard = []
         out_hm = []
         out_ms = []
 
@@ -468,6 +479,9 @@ class ColorColorDiagram():
         for a1 in self.pri_param.grid:
             xx = self.matrix[a1, None][0]
             yy = self.matrix[a1, None][1]
+            hard = self.matrix[a1, None][2]
+            medium = self.matrix[a1, None][3]
+            soft= self.matrix[a1, None][4]
             pri_grid = [a1]*len(xx)
 
             assert len(xx) == len(sec_fine_grid)
@@ -477,6 +491,9 @@ class ColorColorDiagram():
             out_sec.extend(sec_fine_grid[::res])
             out_hm.extend(xx[::res])
             out_ms.extend(yy[::res])
+            out_hard.extend(hard[::res])
+            out_soft.extend(soft[::res])
+            out_medium.extend(medium[::res])
 
         # Create output crate
         from crates_contrib.utils import make_table_crate
@@ -484,16 +501,22 @@ class ColorColorDiagram():
         # Column names
         pri_col_name = self.pri_param.obj.name
         sec_col_name = self.sec_param.obj.name
-        hm_col_name = "HM"
-        ms_col_name = "MS"
-        colnames = [pri_col_name, sec_col_name, hm_col_name, ms_col_name]
+        hm_col_name = "HARD_HM"
+        ms_col_name = "HARD_MS"
+        colnames = [pri_col_name, sec_col_name, 
+                    self.cc.yy.soft.token+"_COUNTS",
+                    self.cc.yy.hard.token+"_COUNTS",
+                    self.cc.xx.hard.token+"_COUNTS",
+                    hm_col_name, ms_col_name]
 
-        out_cr = make_table_crate(out_pri, out_sec, out_hm, out_ms,
+        out_cr = make_table_crate(out_pri, out_sec,
+                                  out_soft, out_medium, out_hard,
+                                  out_hm, out_ms,
                                   colnames=colnames)
 
         self._cr = out_cr
 
-    def _write_keywords(self):
+    def _write_keywords(self, toolname):
         # Add a bunch of meta-data
         from pycrates import set_key
         from os.path import basename
@@ -528,12 +551,14 @@ class ColorColorDiagram():
             set_key(self._cr, "BBAND_HI", self.cc.xx.total.hi, unit="keV",
                     desc="Total {} band high energy".format(self.cc.xx.total.token))
 
-    def write(self, outfile):
+        set_key(self._cr, "CREATOR", toolname)
+
+    def write(self, outfile, toolname="color_color"):
         """
         Write out the results
         """
         self._write_columns()
-        self._write_keywords()
+        self._write_keywords(toolname)
         self._cr.write(outfile, clobber=True)
 
     def plot(self, outfile=None):

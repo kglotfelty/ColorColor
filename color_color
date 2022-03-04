@@ -107,7 +107,7 @@ def tool():
     # Go to work
     from ciao_contrib.runtool import add_tool_history
     matrix = cc(mp1, mp2, eL, eM, eH, None)
-    matrix.write(pars["outfile"])
+    matrix.write(pars["outfile"], toolname=toolname)
     add_tool_history(pars["outfile"], toolname, pars, toolversion=__revision__)
 
     # Plot stuff?
@@ -125,9 +125,4 @@ def tool():
 
 
 if __name__ == "__main__":
-    try:
         tool()
-    except Exception as E:
-        print("\n# "+toolname+" ("+__revision__+"): ERROR "+str(E)+"\n", file=sys.stderr)
-        sys.exit(1)
-    sys.exit(0)
