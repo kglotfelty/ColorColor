@@ -391,7 +391,7 @@ class ColorColor():
                 self.fakeit()
 
                 # Compute the HR in 2 separate energy bands
-                xx, hard, medium= self.xx()
+                xx, hard, medium = self.xx()
                 yy, medium2, soft = self.yy()
 
                 assert medium == medium2, "Whoops"
@@ -464,6 +464,67 @@ class ColorColorDiagram():
         self.square = square
         self._cr = None
 
+    def get_results(self):
+        '''Get all the results so user can do something special with them
+
+        This returns a dictionary with the parameter values,
+        the hardness ratios, and the counts in each of the 3 bands.
+
+        >>> matrix = cc(photon_index, absorption, soft, medium, hard, broad)
+        >>> results = matrix.get_results()
+        >>> print(results.keys())
+        dict_keys(['PhoIndex', 'nH', 'HARD_HM', 'HARD_MS', 'H_COUNTS', 'M_COUNTS', 'S_COUNTS'])
+        '''
+        axis1_name = self.pri_param.obj.name
+        axis2_name = self.sec_param.obj.name
+        hr1_name = "HARD_HM"
+        hr2_name = "HARD_MS"
+        soft_name = self.cc.yy.soft.token+"_COUNTS"
+        med_name = self.cc.yy.hard.token+"_COUNTS"
+        hard_name = self.cc.xx.hard.token+"_COUNTS"
+
+        out_pri = []
+        out_sec = []
+        out_soft = []
+        out_medium = []
+        out_hard = []
+        out_hm = []
+        out_ms = []
+
+        sec_fine_grid = self.sec_param.finegrid()
+        pri_fine_grid = self.pri_param.finegrid()
+
+        for a1 in self.pri_param.grid:
+            xx = self.matrix[a1, None][0]
+            yy = self.matrix[a1, None][1]
+            out_pri.extend([a1]*len(xx))
+            out_sec.extend(sec_fine_grid)
+            out_hm.extend(xx)
+            out_ms.extend(yy)
+            out_hard.extend(self.matrix[a1, None][2])
+            out_medium.extend(self.matrix[a1, None][3])
+            out_soft.extend(self.matrix[a1, None][4])
+
+        for a2 in self.sec_param.grid:
+            xx = self.matrix[None, a2][0]
+            yy = self.matrix[None, a2][1]
+            out_pri.extend(pri_fine_grid)
+            out_sec.extend([a2]*len(xx))
+            out_hm.extend(xx)
+            out_ms.extend(yy)
+            out_hard.extend(self.matrix[None, a2][2])
+            out_medium.extend(self.matrix[None, a2][3])
+            out_soft.extend(self.matrix[None, a2][4])
+
+        retval = {axis1_name: out_pri,
+                  axis2_name: out_sec,
+                  hr1_name: out_hm,
+                  hr2_name: out_ms,
+                  hard_name: out_hard,
+                  med_name: out_medium,
+                  soft_name: out_soft}
+        return retval
+
     def _write_columns(self):
         # Column values
         out_pri = []
@@ -481,7 +542,7 @@ class ColorColorDiagram():
             yy = self.matrix[a1, None][1]
             hard = self.matrix[a1, None][2]
             medium = self.matrix[a1, None][3]
-            soft= self.matrix[a1, None][4]
+            soft = self.matrix[a1, None][4]
             pri_grid = [a1]*len(xx)
 
             assert len(xx) == len(sec_fine_grid)
@@ -503,7 +564,7 @@ class ColorColorDiagram():
         sec_col_name = self.sec_param.obj.name
         hm_col_name = "HARD_HM"
         ms_col_name = "HARD_MS"
-        colnames = [pri_col_name, sec_col_name, 
+        colnames = [pri_col_name, sec_col_name,
                     self.cc.yy.soft.token+"_COUNTS",
                     self.cc.yy.hard.token+"_COUNTS",
                     self.cc.xx.hard.token+"_COUNTS",
