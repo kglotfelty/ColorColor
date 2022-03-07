@@ -40,7 +40,7 @@ The plot shown above was created using the following command line
 
 ```bash
 $ color_color acis.arf clr.fits mode=h showplot=yes outplot=clr.png \
-    model="xswabs.abs1*xspowerlaw.pwrlaw" \
+    model="xsphabs.abs1*xspowerlaw.pwrlaw" \
     param1=pwrlaw.PhoIndex \
     grid1=1,2,3,4 \
     param2=abs1.nH \
@@ -61,8 +61,11 @@ Columns for Table Block TABLE
 ColNo  Name                 Unit        Type             Range
    1   PhoIndex                          Real8          -Inf:+Inf            
    2   nH                                Real8          -Inf:+Inf            
-   3   HM                                Real8          -Inf:+Inf            
-   4   MS                                Real8          -Inf:+Inf            
+   3   S_COUNTS                          Real8          -Inf:+Inf            
+   4   M_COUNTS                          Real8          -Inf:+Inf            
+   5   H_COUNTS                          Real8          -Inf:+Inf            
+   6   HARD_HM                           Real8          -Inf:+Inf            
+   7   HARD_MS                           Real8          -Inf:+Inf            
 ```
 
 
@@ -115,6 +118,7 @@ absorption.set_label_style(color="forestgreen")
 
 hm_ms_results.plot("color_color.png")
 
+vals = hm_ms_results.get_results()
 ```
 
 The output looks like

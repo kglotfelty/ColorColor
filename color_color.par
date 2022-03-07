@@ -1,7 +1,7 @@
 infile,f,a,"acissD2020-11-17pimmsN0023.fits",,,"Input ARF file"
 outfile,f,a,"clr.fits",,,"Output file name"
 #
-model,s,a,"xswabs.abs1*xspowerlaw.pwrlaw",,,"Sherpa model expression"
+model,s,a,"xsphabs.abs1*xspowerlaw.pwrlaw",,,"Sherpa model expression"
 param1,s,a,"pwrlaw.PhoIndex",,,"Model parameter for 1st axis"
 grid1,s,a,"1,2,3,4",,,"Model parameter grid for 1st axis"
 param2,s,a,"abs1.nH",,,"Model parameter for 2nd axis"
